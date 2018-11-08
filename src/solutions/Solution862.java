@@ -1,6 +1,8 @@
 package solutions;
 
 import java.util.Random;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 public class Solution862 {
 
@@ -8,45 +10,61 @@ public class Solution862 {
     private static final Solution862 SOLUTION = new Solution862();
 
     public static void main(String[] args) {
-        int tmp = 0;
-        int x = (tmp += 1);
-        System.out.println(x);
         //[-28,81,-20,28,-29]
         //89
         int[] a = {-28, 81, -20, 28, -29};
         int k = 89;
         System.out.println(SOLUTION.shortestSubarray(a, k));
-        test();
+//        test();
+    }
+
+    class Node implements Comparable<Node> {
+        int i;
+        int v;
+
+        public Node(int i, int v) {
+            this.i = i;
+            this.v = v;
+        }
+
+        @Override
+        public int compareTo(Node o) {
+            return v - o.v;
+        }
+
     }
 
 
     public int shortestSubarray(int[] A, int K) {
         int length = A.length;
-        int[] sumTo0 = new int[length];
+        Node[] sums = new Node[length];
         int result = length;
 
-        int sum = 0, min = A[0], max = A[0], maxIndex = 0, minIndex = 0;
+        int sum = 0, min = A[0], lo = 0;
+        SortedSet<Node> set = new TreeSet<>(Node::compareTo);
 
-        for (int hi = 0; hi < A.length; hi++) {
-            if (A[hi] >= K) return 1;
-            sumTo0[hi] = sum;
-            if (sum > min) {
-                min = sum;
-                maxIndex = hi;
-            } else if (sum < max) {
-                max = sum;
-                minIndex = hi;
+        for (int hi = 1; hi <= A.length; hi++) {
+            int a = A[hi - 1];
+            if (a >= K) return 1;
+            sums[hi] = new Node(hi, a);
+            set.add(sums[hi]);
+            if (sum < min) {
+                lo = hi;
             }
 
-            if (max - sum >= K) {
-                for (int lo = maxIndex; lo < hi; lo++) {
-
+            int i = lo;
+            if (sum - min >= K) {
+                for (i = lo + 1; i < hi; i++) {
+                    if (sums[i].v <= sum - K) {
+                        result = hi - i;
+                    }
                 }
             }
-            if (sum - min >= K) {
-
+            for (; lo < i; lo++) {
+                set.remove(sums[lo]);
             }
-
+            min = set.first().v;
+            lo = set.first().i;
         }
 
 
