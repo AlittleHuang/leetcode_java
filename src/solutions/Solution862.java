@@ -1,8 +1,7 @@
 package solutions;
 
+import java.util.Arrays;
 import java.util.Random;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 public class Solution862 {
 
@@ -10,80 +9,117 @@ public class Solution862 {
     private static final Solution862 SOLUTION = new Solution862();
 
     public static void main(String[] args) {
-        //[-28,81,-20,28,-29]
-        //89
-        int[] a = {-28, 81, -20, 28, -29};
-        int k = 89;
+        //[31,63,-38,43,65,74,90,-23,45,22]
+        //341
+        int[] a = {1, 1, 0, 0, -3, 6, 2, 1, 1, 6};
+        int k = 8;
         System.out.println(SOLUTION.shortestSubarray(a, k));
-//        test();
-    }
-
-    class Node implements Comparable<Node> {
-        int i;
-        int v;
-
-        public Node(int i, int v) {
-            this.i = i;
-            this.v = v;
-        }
-
-        @Override
-        public int compareTo(Node o) {
-            return v - o.v;
-        }
-
+        int[] test = test();
+        int result = SOLUTION.shortestSubarray(test, 8);
+        System.out.println(result);
     }
 
 
     public int shortestSubarray(int[] A, int K) {
+
         int length = A.length;
-        Node[] sums = new Node[length];
-        int result = length;
+        int[] sums = new int[length + 1];
+        int[] nexMax = new int[length];
+        int shortest = length + 1;
 
-        int sum = 0, min = A[0], lo = 0;
-        SortedSet<Node> set = new TreeSet<>(Node::compareTo);
+        int right = length;
 
-        for (int hi = 1; hi <= A.length; hi++) {
-            int a = A[hi - 1];
-            if (a >= K) return 1;
-            sums[hi] = new Node(hi, a);
-            set.add(sums[hi]);
-            if (sum < min) {
-                lo = hi;
-            }
-
-            int i = lo;
-            if (sum - min >= K) {
-                for (i = lo + 1; i < hi; i++) {
-                    if (sums[i].v <= sum - K) {
-                        result = hi - i;
-                    }
+        for (int left = length - 1; left >= 0; left--) {
+            if (A[left] >= K) return 1;
+            sums[left] = sums[left + 1] + A[left];
+            right = Math.min(length, left + shortest);
+            for (; right > left; right--) {
+                if (sums[left] - sums[right] >= K) {
+                    shortest = right - left;
                 }
             }
-            for (; lo < i; lo++) {
-                set.remove(sums[lo]);
-            }
-            min = set.first().v;
-            lo = set.first().i;
+
         }
 
 
-        return result;
+        return shortest > length ? -1 : shortest;
     }
 
-    private static void test() {
-        int length = 100000;
+    private static int[] test() {
+        int length = 10;
+        int k = 8;
         int[] A = new int[length];
         Random random = new Random();
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 1000000; i++) {
             for (int j = 0; j < length; j++) {
-                A[j] = random.nextInt(1000000) - 500000;
+                A[j] = random.nextInt(10) - 3;
             }
             long time = System.currentTimeMillis();
-            int result = SOLUTION.shortestSubarray(A, 10000000);
-            System.out.println(result + "-->time:" + (System.currentTimeMillis() - time));
+            int result = 0;
+            try {
+                result = SOLUTION.shortestSubarray(A, k);
+            } catch (Exception e) {
+                throw new RuntimeException(Arrays.toString(A), e);
+            }
+            int demo = SOLUTION.shortestSubarrayDemo(Arrays.copyOf(A, length), k);
+            if (result == demo) {
+                System.out.print(result + ", "/* + "<-->" + demo + Arrays.toString(A)*/);
+            } else {
+                System.out.println();
+                System.out.println(result + "<-->" + demo + Arrays.toString(A));
+                return A;
+            }
 
         }
+        return null;
+    }
+
+    public int shortestSubarrayDemo(int[] A, int K) {
+
+        if (A == null || A.length == 0) {
+            return 0;
+        }
+        if (Integer.MIN_VALUE == K) {
+            return -1;
+        }
+        if (A.length == 1) {
+            return A[0] >= K ? 1 : -1;
+        }
+
+        if (K <= 0) {
+            for (int i = 0; i < A.length; i++) {
+                if (A[i] >= K) {
+                    return 1;
+                }
+            }
+            return -1;
+        }
+
+        int before = A[0];
+        for (int i = 1; i < A.length; i++) {
+            before = (A[i] += before);
+        }
+
+        int[] indexs = new int[A.length + 1];
+        indexs[0] = -1;
+        int[] values = new int[A.length + 1];
+
+        int left = 0, right = 0, rRt = -1;
+        for (int i = 0; i < A.length; i++) {
+            for (; left <= right && A[i] - values[left] >= K; ) {
+                if (rRt == -1 || i - indexs[left] < rRt) {
+                    rRt = i - indexs[left];
+                }
+                left += 1;
+            }
+            for (; left <= right && values[right] >= A[i]; ) {
+                right -= 1;
+            }
+            right += 1;
+            indexs[right] = i;
+            values[right] = A[i];
+        }
+        return rRt;
     }
 
 
