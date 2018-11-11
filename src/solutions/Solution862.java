@@ -1,71 +1,28 @@
 package solutions;
 
-import java.util.Random;
-
 public class Solution862 {
 
-
-    private static final Solution862 SOLUTION = new Solution862();
-
-    public static void main(String[] args) {
-        int tmp = 0;
-        int x = (tmp += 1);
-        System.out.println(x);
-        //[-28,81,-20,28,-29]
-        //89
-        int[] a = {-28, 81, -20, 28, -29};
-        int k = 89;
-        System.out.println(SOLUTION.shortestSubarray(a, k));
-        test();
-    }
-
-
     public int shortestSubarray(int[] A, int K) {
-        int length = A.length;
-        int[] sumTo0 = new int[length];
-        int result = length;
 
-        int sum = 0, min = A[0], max = A[0], maxIndex = 0, minIndex = 0;
-
-        for (int hi = 0; hi < A.length; hi++) {
-            if (A[hi] >= K) return 1;
-            sumTo0[hi] = sum;
-            if (sum > min) {
-                min = sum;
-                maxIndex = hi;
-            } else if (sum < max) {
-                max = sum;
-                minIndex = hi;
-            }
-
-            if (max - sum >= K) {
-                for (int lo = maxIndex; lo < hi; lo++) {
-
-                }
-            }
-            if (sum - min >= K) {
-
-            }
-
+        int[] sums = new int[A.length];
+        sums[0] = A[0];
+        for (int i = 1; i < sums.length; i++) {
+            sums[i] = sums[i - 1] + A[i];
         }
 
+        int[] loIndexs = new int[sums.length];//
+        int loLength = 0;
+        int shortest = A.length + 1;
 
-        return result;
-    }
-
-    private static void test() {
-        int length = 100000;
-        int[] A = new int[length];
-        Random random = new Random();
-        for (int i = 0; i < 1000; i++) {
-            for (int j = 0; j < length; j++) {
-                A[j] = random.nextInt(1000000) - 500000;
+        for (int ilo = 0, hi = 0; hi < sums.length; hi++) {
+            for (; ilo < loLength && sums[hi] - sums[loIndexs[ilo]] >= K; ilo++) {
+                shortest = Math.min(shortest, hi - loIndexs[ilo]);
             }
-            long time = System.currentTimeMillis();
-            int result = SOLUTION.shortestSubarray(A, 10000000);
-            System.out.println(result + "-->time:" + (System.currentTimeMillis() - time));
-
+            for (; ilo < loLength && sums[loIndexs[loLength - 1]] >= sums[hi]; loLength--) ;
+            loIndexs[loLength++] = hi;
         }
+        return shortest > A.length ? -1 : shortest;
+
     }
 
 
