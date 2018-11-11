@@ -2,12 +2,16 @@ package solutions;
 
 public class Solution862 {
 
+    public static void main(String[] args) {
+        int[] a = {1, 2};
+        System.out.println(new Solution862().shortestSubarray(a, 4));
+    }
+
     public int shortestSubarray(int[] A, int K) {
 
-        int[] sums = new int[A.length];
-        sums[0] = A[0];
-        for (int i = 1; i < sums.length; i++) {
-            sums[i] = sums[i - 1] + A[i];
+        int[] sums = new int[A.length + 1];
+        for (int i = 0; i < A.length; i++) {
+            sums[i + 1] = sums[i] + A[i];
         }
 
         int[] loIndexs = new int[sums.length];//
