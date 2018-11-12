@@ -14,16 +14,18 @@ public class Solution862 {
             sums[i + 1] = sums[i] + A[i];
         }
 
-        int[] loIndexs = new int[sums.length];//
-        int loLength = 0;
+        int[] loIndexs = new int[sums.length];//list
+        int loLength = 0;//loIndexs length
         int shortest = A.length + 1;
 
         for (int ilo = 0, hi = 0; hi < sums.length; hi++) {
             for (; ilo < loLength && sums[hi] - sums[loIndexs[ilo]] >= K; ilo++) {
                 shortest = Math.min(shortest, hi - loIndexs[ilo]);
             }
-            for (; ilo < loLength && sums[loIndexs[loLength - 1]] >= sums[hi]; loLength--) ;
-            loIndexs[loLength++] = hi;
+            while (ilo < loLength && sums[loIndexs[loLength - 1]] >= sums[hi]) {
+                loLength--;//pop
+            }
+            loIndexs[loLength++] = hi;//push
         }
         return shortest > A.length ? -1 : shortest;
 
